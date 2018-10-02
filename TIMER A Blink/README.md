@@ -1,15 +1,21 @@
-# TIMER A Blink
-The TIMER peripherals can be used in many situations thanks to it flexibility in features. For this lab, you will be only scratching the surface as to what this peripheral can do. 
+# Kyle McKeown- TIMER A Blink
+
+## Timer_A_Blink contains the following two folders
+* MSP430G2553_Timer_A_Blink
+* MSP430FR2311_Timer_A_Blink
+
+	The goal in this portion of the lab was to use the built in timer modules to blink an LED based on the the clock speed that varies based on how many times the button is pressed. The way that I implemented the code was to trigger an interrupt to subtract a specified value from the CCR0 register that is enabled in up-count mode and compare that register to the timer A module that is continuously running. Each pass that the interrupt makes subtracts the value of 50 from the CCR0 register which causes the inturrupt that triggers the LED to happen at a faster rate with each button press. In my main function I am running an infinite while loop. However the lights cease to blink when the Frequency becomes too high or the value in the CCR0 register becomes 0
 
 ## Up, Down, Continuous 
-There are a few different ways that the timer module can count. For starters, one of the easiest to initialize is Continuous counting where in the TIMER module will alert you when its own counting register overflows. Up mode allows you to utilize a Capture/Compare register to have the counter stop at a particular count and then start back over again. You can also set the TIMER to Up/Down mode where upon hitting a counter or the overflow, instead of setting the counter back to zero, it will count back down to zero. 
+	For Timer_A_Blink the CCR0 register is set to up mode. It was implemented this way so that the value in CCR0 register could be compared to the value in the Timer A register and fire an intterupt when the values were reached. 
 
-## Task
-Using the TIMER module instead of a software loop, control the speed of two LEDS blinking on your development boards. Experiment with the different counting modes available as well as the effect of the pre-dividers. Why would you ever want to use a pre-divider? What about the Capture and Compare registers? Your code should include a function (if you want, place it in its own .c and .h files) which can convert a desired Hz into the proper values required to operate the TIMER modules.
+## Differences Between The Two Boards
+	One of the major differences between the two implementations of this code is that the FR2311 has a timer B module that has a different frequency than the timer A module that is found on the G2553. 
+	The MSP430G2553  TIMER A operates at a frequency of 20 kHz
+	The MSP430FR2311 TIMER B operates at a frequency of 8 MHz
 
-### Extra Work
-#### Thinking with HALs
-So maybe up to this point you have noticed that your software is looking pretty damn similar to each other for each one of these boards. What if there was a way to abstract away all of the particulars for a processor and use the same functional C code for each board? Just for this simple problem, why don't you try and build a "config.h" file which using IFDEF statements can check to see what processor is on board and initialize particular registers based on that.
+In addition ports needed to be changed between the two boards and for the MSP430G2553 the 32kHZ crystal needed to be deactivated in favor of the VLOCLK and the GPIO power-on default had to be disabled on the MSP430FR2311 based on a reccomendation from the compiler. I still do not quite understand the significance of this but I know that the code runs much better with the following line of code: 
 
-#### Low Power Timers
-Since you should have already done a little with interrupts, why not build this system up using interrupts and when the processor is basically doing nothing other than burning clock cycles, drop it into a Low Power mode. Do a little research and figure out what some of these low power modes actually do to the processor, then try and use them in your code. If you really want to put your code to the test, using the MSP430FR5994 and the built in super cap, try and get your code to run for the longest amount of time only using that capacitor as your power source.
+PM5CTLO &= ~LOCKLPM5;
+
+
